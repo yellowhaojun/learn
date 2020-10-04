@@ -389,3 +389,230 @@ console.log(result) // hey, tom is a woman
 
 #### 字符串的扩展方法
 
+例子1:
+
+字符串内是否包含某个字符
+
+```js
+const message = 'Error: foo is not defined.'
+console.log(message.includes('is')) // true
+```
+
+例子2:
+
+字符串是否以某个字符开头
+
+```js
+const message = 'Error: foo is not defined.'
+console.log(message.startsWith('E')) // true
+```
+
+例子3:
+
+字符串是否以某个字符结束
+
+```js
+const message = 'Error: foo is not defined.'
+console.log(message.endsWith('ed.')) // true
+```
+
+#### 参数
+
+例子1：
+
+默认形参
+
+相当于 params === undefined ? true : params
+
+```js
+function foo(params = true) {
+  console.log(params)
+}
+
+foo() // true
+```
+
+例子2:
+
+剩余参数，剩余的参数必须放在形参的最后
+
+```js
+function foo(first, ...args) {
+  console.log(first, ...args)
+}
+
+foo(1, 2, 3, 4) // 1 2 3 4
+```
+
+#### 箭头函数
+
+箭头函数比原本的函数表达式更简洁，并且没有自己的`this，`arguments`，`super`或`new.target。箭头函数表达式更适用于那些本来需要匿名函数的地方，并且它不能用作构造函数。
+
+例子1:
+
+```js
+// 原本的函数表达式
+function add(n1, n2) {
+  return n1 + n2
+}
+
+// 箭头函数
+const add = (n1, n2) => n1 + n2
+```
+
+箭头函数 => 如果不写 {} ，默认返回后面表达式的值，只有后面的代码是一行的时候才能省略 {}
+
+```js
+const add = (n1, n2) => {
+  console.log(n1, n2)
+  return n1 + n2
+}
+```
+
+当写了{}后，必须自己手动去返回值
+
+当参数值只有一个值的时候可以省略括号
+
+```js
+const foo = value => value + 1
+```
+
+需要返回一个对象，除了可以使用return外，还可以使用()
+
+```js
+const arrow = (n1) => ({ name: n1 })
+
+console.log(arrow('jack')) // { "name": "jack" }
+```
+
+例子2:
+
+箭头函数不能用做构造函数，不存在super
+
+```js
+const add = (n1, n2) => n1 + n2
+console.log(new add()) // error
+```
+
+例子3:
+
+箭头函数不绑定自己的arguments
+
+```js
+function count(n) {
+  const f = () => arguments[0] + n
+  return f()
+}
+
+console.log(count(0)) // 0
+console.log(count(10)) // 20
+```
+
+count内的f是一个箭头函数，但是使用的arguments确实count的arguments
+
+例子4：
+
+箭头函数不绑定this，会捕获其所在的上下文的this值，作为自己的this值
+
+```js
+const person = {
+  name: 'jack',
+  sayHi () {
+    console.log(`Hi, ${this.name}`)
+  }
+}
+person.sayHi() // 'Hi, jack'
+```
+
+定义了一个person，当我们调用的person.sayHi的时候，这个时候this指向得是person，所以我们输出的是'Hi, jack'
+
+当我们修改为箭头函数的时候
+
+```js
+const person = {
+  name: 'jack',
+  sayHi: () => {
+    console.log(`Hi, ${this.name}`)
+  }
+}
+person.sayHi() // 'Hi, undefined'
+```
+
+这个时候你会发现输出的是'Hi, undefined'，那是因为箭头函数和普通函数不一样，他是查找上级作用域是谁，那么this就是谁，如果在浏览器环境当中，这里的this的上级作用域是window，window上并不存在name的字段，所以就是undefined
+
+再修改一下当前的函数
+
+```js
+
+const person = {
+  name: 'jack',
+  sayHi () {
+    setTimeout(() => {
+      console.log(`Hi, ${this.name}`)
+    })
+  }
+}
+person.sayHi() // 'Hi, jack'
+```
+
+加入了一个setTimeout进去，这里的this指向因为是箭头函数，所以会指向上一级的作用域，上一级的作用域是person这个对象，所以这里也会得到'Hi, jack'
+
+#### 对象字面量
+
+例子1:
+
+当我们在编写一个对象的时候，假设key和value是一致的时候，我们可以省略一下代码上value的值
+
+```js
+const bar = '345'
+
+const obj = {
+  foo: 123,
+  bar
+}
+
+console.log(obj) // { foo: 123, bar: '345' }
+```
+
+例子2:
+
+对象上普通函数值，也可以省略function () {}
+
+```js
+const bar = '345'
+
+const obj = {
+  foo: 123,
+  bar,
+  fn1 () {
+    return this.foo
+  }
+}
+console.log(obj) // { foo: 123, bar: '345', fn1: [Function: fn1] }
+```
+
+例子3:
+
+可以使用表达式当作属性名
+
+```js
+const bar = '345'
+
+const obj = {
+  foo: 123,
+  bar,
+  fn1 () {
+    return this.foo
+  },
+  [1+2] () {
+    return bar
+  }
+}
+
+console.log(obj) // { '3': [Function: 3], foo: 123, bar: '345', fn1: [Function: fn1] }
+```
+
+#### Object的方法
+
+例子1：
+
