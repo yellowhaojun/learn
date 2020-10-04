@@ -49,8 +49,8 @@
 // console.log(set)
 
 
-const set = new Set()
-set.add(1).add(2)
+// const set = new Set()
+// set.add(1).add(2)
 
 // set.forEach(item => {
 //   console.log(item)
@@ -59,3 +59,12 @@ set.add(1).add(2)
 // for (const value of set) {
 //   console.log(value)
 // }
+
+// const arr = [1, 3, 4, 5, 1, 2, 3]
+// const set = [ ...new Set(arr) ]
+// console.log(set)
+
+
+const arr = [1, 3, 4, 5, 1, 2, 3]
+const set = Array.from(new Set(arr))
+console.log(set)

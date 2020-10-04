@@ -108,3 +108,22 @@ for (const value of set) {
   console.log(value)
 }
 ```
+
+## 使用场景
+
+### 数组去重
+
+数组的去重是set的一个典型的应用场景
+
+```js
+// 使用展开语法
+const arr = [1, 3, 4, 5, 1, 2, 3]
+const set = [ ...new Set(arr) ]
+console.log(set) // [ 1, 3, 4, 5, 2 ]
+
+// 使用Array.from
+const arr = [1, 3, 4, 5, 1, 2, 3]
+const set = Array.from(new Set(arr))
+console.log(set) // [ 1, 3, 4, 5, 2 ]
+```
+
