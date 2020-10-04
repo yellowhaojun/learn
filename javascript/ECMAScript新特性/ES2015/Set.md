@@ -92,7 +92,7 @@ console.log(set) // Set {}
 
 ## 遍历
 
-在使用Set的时候，我们需要遍历这个值
+在使用Set的时候，可以遍历这个Set
 
 ```js
 const set = new Set()
