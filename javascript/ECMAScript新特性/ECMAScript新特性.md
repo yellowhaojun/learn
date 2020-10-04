@@ -35,7 +35,7 @@ ES2016相对前几个版本来说这个版本的改动会比较大，这版本�
 
 #### let 与 块级作用域
 
-> 在此之前，ES只有全局作用域和函数作用域，ES6种新增了块级作用域
+在此之前，ES只有全局作用域和函数作用域，ES6种新增了块级作用域
 
 例子1：
 
@@ -681,5 +681,186 @@ Object.is(+0, -0) // false
 Object.is(NaN, NaN) // true
 ```
 
-#### proxy
+#### Proxy
 
+对象用于定义基本操作的自定义行为（如属性查找、赋值、枚举、函数调用等）
+
+简单点来说就是代理（代为管理），可以通过自定义方法去处理对象上的一些操作。
+
+```js
+const target = {
+  name: 'jack'
+}
+
+const halder = {}
+
+const proxy =  new Proxy(target, hander)
+
+console.log(proxy.name) // jack
+```
+
+new Proxy 接收2个参数，第一个为target，需要代理的对象，第二个为hanlder 自定义行为的处理对象。
+
+例子1:
+
+方法是设置属性值操作的捕获器 get
+
+```js
+const obj = {
+  name: 'jack'
+}
+const proxy =  new Proxy(obj, {
+  get (target, property) {
+    console.log(target, property) // { name: 'jack' } age
+    return property in target ? target[property] : null
+  }
+})
+
+console.log(proxy.age) // null
+```
+
+**参数：**
+
+1. target 代理的对象
+2. property 被获取属性名， 如果代理的为数组的，当前值为数组中的下标
+
+**返回数：**
+
+可以返回任何值
+
+例子2：
+
+```js
+const obj = {
+  name: 'jack'
+}
+
+const proxy = new Proxy(obj, {
+  set (target, property, value) {
+    console.log(target, property, value) // { name: 'jack' } name tom
+    return true
+  }
+})
+
+proxy.name = 'tom'
+```
+
+**参数：**
+
+1. target 代理的对象
+2. property 被获取属性名，如果代理的为数组的，当前值为数组中的下标
+3. value 设置的属性值
+
+**返回值：**
+
+应当返回一个boolean
+
+返回 `true` 代表属性设置成功
+
+返回 `false` 表示属性设置失败
+
+#### Reflect
+
+Reflect 是一个静态的方法，他提供了一系列的方法，让我们的代码更加的统一
+
+Reflect 一共有13个静态的方法
+
+#### Class
+
+ES6当中给我们提供了一个新的语法糖，Class，我们过去使用面向对象，使用的是function的构造函数，而在ES6当中，使用Class使我们的面向对象用起来更加的方便
+
+例子1:
+
+基础使用
+
+```js
+// 过去
+function Person(name) {
+  this.name = name
+}
+
+Person.prototype.sayHi = function() {
+  console.log(`Hi, my name is ${this.name}`)
+}
+
+const person = new Person('jack')
+person.sayHi() // Hi, my name is jack
+
+// 现在
+class Person {
+  constructor(name) { // 构造函数
+    this.name = name
+  }
+  sayHi() {
+    console.log(`Hi, my name is ${this.name}`)
+  }
+}
+
+
+const person = new Person('jack')
+person.sayHi() // Hi, my name is jack
+```
+
+例子2:
+
+静态方法
+
+static 关键字是用于生成一个静态的方法，而静态方法是直接挂载到Class上的，所以我们调用的时候使用Person.creact调用，而不是new一个实例去调用
+
+```js
+class Person {
+  constructor(name) {
+    this.name = name
+  }
+
+  sayHi() {
+    console.log(`Hi, my name is ${this.name}`)
+  }
+
+  static create(name) {
+    return new Person(name)
+  }
+}
+
+const person = Person.create('jack')
+person.sayHi() // Hi, my name is jack
+```
+
+例子3:
+
+extends继承
+
+面向对象一个很重要的特性，就是类的继承，在ES6中能够更容易地去实现这个继承
+
+```js
+class Person {
+  constructor(name) {
+    this.name = name
+  }
+
+  sayHi() {
+    console.log(`Hi, my name is ${this.name}`)
+  }
+
+  static create(name) {
+    return new Person(name)
+  }
+}
+
+// Student 继承 Person
+class Student extends Person {
+  constructor(name) {
+    super(name) // 调用了父类的constructor
+  }
+  learn () {
+    super.sayHi() // 调用了父类的sayHi方法
+    console.log(`${this.name} love study`) 
+  }
+}
+
+const student = new  Student('jack')
+student.learn() // Hi, my name is jack
+								 // jack love study
+```
+
+super的关键字是用于调用父类的方法或者访问的，直接调用super相当于调用了父类的 constructor 构造函数 
