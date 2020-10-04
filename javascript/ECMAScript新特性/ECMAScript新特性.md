@@ -31,6 +31,8 @@ ES2016相对前几个版本来说这个版本的改动会比较大，这版本�
 
 ### 新特性
 
+1. let 与 const
+
 ## ECMAScript 7
 
 ## ECMAScript 8

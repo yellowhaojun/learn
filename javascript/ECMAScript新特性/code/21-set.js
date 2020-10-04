@@ -30,8 +30,32 @@
 // console.log(set)
 
 
+// const set = new Set()
+
+// set.add(1).add(1)
+
+// console.log(set.has(1)) // true
+
+
+// const set = new Set()
+// set.add(1).add(2)
+// console.log(set.size)
+
+
+// const set = new Set()
+// set.add(1).add(2)
+// set.delete(1)
+// set.clear()
+// console.log(set)
+
+
 const set = new Set()
+set.add(1).add(2)
 
-set.add(1).add(1)
+// set.forEach(item => {
+//   console.log(item)
+// })
 
-console.log(set)
+// for (const value of set) {
+//   console.log(value)
+// }
