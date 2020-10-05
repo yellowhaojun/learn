@@ -18,6 +18,22 @@ console.log(copy === target) // false
 
 只需要使用一个空对象，和原有的对象进行合并，这种操作相当于把对象复制了，而复制之后的对象和之前的对象是不存在关联的
 
+```js
+const p1 = {
+  firstName: 'Li',
+  lastName: 'Lei',
+  get fullName () {
+    return this.firstName + ' ' + this.lastName
+  }
+}
+console.log(p1) // { firstName: 'Li', lastName: 'Lei', fullName: [Getter] }
+
+const p2 = Object.assign({}, p1)
+console.log(p2) // { firstName: 'Li', lastName: 'Lei', fullName: 'Li Lei' }
+```
+
+Object.assign 复制得是可以枚举到的值，假设源对象当中存在`getter`或着`setter`将会被复制成可以枚举到的属性
+
 ### 合并对象
 
 ```js
@@ -44,6 +60,8 @@ console.log(target, result) // { a: 8888, c: 456, b: 789, d: 789 } { a: 8888, c:
 
 把target与source1、source2进行合并，再去修改target.a为8888，会发现result的a值也会跟着改变，从这里可以看出合并对象和原对象之前是存在关联的
 
+
+
 ## is
 
 我们在使用等于或者全等去对比一些数值的时候可能出现一下和你理解不一样的情况
@@ -64,3 +82,4 @@ undefined === undefined //  true
 Object.is(+0, -0) // false
 Object.is(NaN, NaN) // true
 ```
+
