@@ -29,13 +29,7 @@ ES2016相对前几个版本来说这个版本的改动会比较大，这版本�
 3. 全新的对象、全新的方法、全新的功能
 4. 全新的数据类型和数据结构
 
-### 新特性
+## ECMAScript 7、ECMAScript 8、ECMAScript 9
 
-1. let 与 const
-
-## ECMAScript 7
-
-## ECMAScript 8
-
-## ECMAScript 9
+> 自ES2015以来，每年都会发布一个新的版本和新特性，ECMAScript 7、ECMAScript 8、ECMAScript 9 对应的分别是2016、2017、2018年发布的版本
 
