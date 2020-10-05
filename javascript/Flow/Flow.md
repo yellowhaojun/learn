@@ -204,3 +204,205 @@ square(100) // success
 
 ### 原始数据类型
 
+原始的数据类型一共6种：
+
+1. string: 字符串类型
+2. number: 数字类型（NaN、Infinity也属于这类型）
+3. boolean: 布尔值类型
+4. null: null 类型
+5. void: undefined 类型
+6. symbol: Symbol 类型
+
+```js
+/**
+ * 原始类型
+ *
+ * @flow
+ */
+
+ const a: string = 'foo'
+ const b: number =  Infinity // NaN // 100
+ const c: boolean = false // true
+ const d: null = null
+ const e: void = undefined
+ const f: symbol = Symbol('foo')
+```
+
+### 对象类型
+
+定义一个对象类型，类似于object对象一样定义它们的值
+
+```js
+const obj1: { name: string } = { name: 'jack' }
+```
+
+需要某个值不一定存在的时候使用?关键字
+
+```js
+const obj2: { name: string, age?: number } = { name: 'jack' }
+```
+
+定义一个不确定字段的Object
+
+```js
+const obj3: { [string]: string } = {}
+obj3.name = 'jack'
+```
+
+### 数组类型
+
+定义数组类型，有两种方式
+
+```js
+const arr1: Array<number> = [1, 2, 3] // 使用泛形的写法
+const arr2: number[] = [1, 2, 3] // 类型加[]的写法
+```
+
+定义一个对象的数组
+
+```js
+ const arr3: { name: string }[] = [{ name: 'jack' }]
+```
+
+定义一个元组(固定位数的数组)
+
+```js
+ const foo: [number, string] = [1, '1']
+```
+
+### 函数类型
+
+定义函数的类型与箭头函数的写法类似
+
+```js
+/**
+ * 函数类型
+ *
+ * @flow
+ */
+
+// : (参数1类型, 参数2类型, ...更多参数类型) => 返回类型
+
+ function foo(callback: (string, number) => void) {
+   callback('string', 100)
+ }
+
+ foo(function (str, num) {
+ })
+```
+
+### mayBe 类型
+
+mayBe类型就是可能为空（null、undefined）加上一种数据类型
+
+```js
+/**
+ * mayBe类型
+ *
+ * @flow
+ */
+
+let num: ?number = 1
+num = null
+num = undefined
+```
+
+### 联合类型
+
+联合类型就是一个值可以有多种类型，使用`|`联合起来
+
+```js
+/**
+ * 联合类型
+ *
+ * @flow
+ */
+
+let type: number | string = '1'
+type = 1
+```
+
+### 声明类型
+
+flow支持我们自己自定义一个类型
+
+```js
+/**
+ * 声明类型
+ *
+ * @flow
+ */
+
+type Status = number | string
+
+const a: Status = 'success'
+```
+
+### 字面量类型
+
+字面量类型就是一种固定值的类型，一般和联合类型、声明类型一起使用
+
+```js
+/**
+ * 字面量类型
+ *
+ * @flow
+ */
+
+const a: 'success' | 'error' = 'success'
+
+type Status = 'success' | 'error'
+const a: Status = 'success'
+```
+
+### Mixed Any
+
+mixed和any都是表示任何的数据类型，any主要是为了兼容旧的代码，而mixed类型还是具备的类型检查的效果
+
+```js
+function testMixed (value: mixed) {
+  value.substr(1) // error
+}
+
+testMixed(1)
+```
+
+上述代码当中传递了1进入，但是方法内却调用了字符串的截取，而flow也提早给我们报错了错误
+
+如果需要解决上述的问题，我们需要做一下类型的推断
+
+```js
+function testMixed (value: mixed) {
+  if (typeof value === 'string') {
+    value.substr(1)
+  }
+}
+
+testMixed(1)
+```
+
+而如果使用了any是不会有任何的报错的，只有在运行的时候我们才能知道错误了
+
+```js
+function testAny (value: any) {
+  value.substr(1)
+}
+
+testAny(1)
+```
+
+### 运行环境的Api
+
+运行环境的Api指的是某些环境下才有的Api，比如说浏览器环境才具备DOM的API
+
+```js
+/**
+ * 运行环境 API
+ *
+ * @flow
+ */
+
+const element: HTMLElement | null = document.getElementById('app')
+```
+
+更多的API查看 https://github.com/facebook/flow/tree/master/lib
