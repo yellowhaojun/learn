@@ -302,7 +302,7 @@ console.log(person.name) // tom_jack
 
 ## 抽象类
 
-假设我们有很多个类，而这些类具备有很多共性，这个时候我们可把这个定义为抽象类，使用abstract 去定义，我们来定一个形状的Class
+假设有多个类，而这些类具备很多共性，这个时候我们可把这个定义为抽象类，使用`abstract` 去定义，我们来定一个形状的Class
 
 ```js
 abstract class Shape {
@@ -318,6 +318,40 @@ class Circular extends Shape {
     getType () {
         return 'circular'
     }
+}
+```
+
+## 类与接口
+
+假设有多个类，而这些类具备相同的接口，这个时候我们可以使用接口来抽象，而这个和抽象类的一个区别，抽象类可以可能会具备一样的属性，而使用接口来抽象，只是抽象了这个动作，具体的抽象过程需要各个类去实现
+
+```typescript
+
+interface Eat {
+  eat(food: string): void
+}
+
+interface Run {
+  run(distance: number): void
+}
+
+class Person implements Eat, Run {
+  eat (food: string): void {
+    console.log(`优雅的进餐: ${food}`)
+  }
+  run (distance: number): void {
+    console.log(`直立行走: ${distance}`)
+  }
+}
+
+class Animal implements Eat, Run {
+  eat (food: string): void {
+    console.log(`呼噜呼噜的吃: ${food}`)
+  }
+
+  run (distance: number) {
+    console.log(`爬行: ${distance}`)
+  }
 }
 ```
 
