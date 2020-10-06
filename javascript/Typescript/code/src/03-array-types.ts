@@ -1,3 +1,5 @@
+// 数组
+
 const arr1: Array<number> = [1, 2]
 
 const arr2: string[] = ['1', '2']

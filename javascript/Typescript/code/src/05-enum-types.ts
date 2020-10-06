@@ -1,3 +1,5 @@
+// 枚举类型
+
 const enum Status {
   OFFLINE,
   ONLINE,

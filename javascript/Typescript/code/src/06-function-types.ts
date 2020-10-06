@@ -1,3 +1,5 @@
+// 函数类型
+
 // function sayHello(): void {
 //   console.log('hello')
 //   return undefined

@@ -1,3 +1,4 @@
+// 类型推断
 
 // let count: number
 // count = 123
