@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>事件绑定/事件委托</title>
+</head>
+<body>
+  <ul id="ul">
+    <li>1</li>
+    <li>2</li>
+    <li>3</li>
+  </ul>
+</body>
+<script>
+  function showText(event) {
+    console.log(event.target.innerHTML)
+  }
+
+  const list = document.querySelectorAll('li')
+  for (const item of list) {
+    item.onclick = showText
+  }
+
+  function showText(event) {
+    let obj = event.target
+    if (obj.nodeName.toLowerCase() === 'li') {
+        console.log(obj.innerHTML)
+    }
+  }
+  oUl.addEventListener('click', showText, true)
+  
+</script>
+</html>

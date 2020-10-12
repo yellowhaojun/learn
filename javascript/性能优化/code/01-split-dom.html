@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>分离DOM</title>
+</head>
+<body>
+  <button id="btn">Add</button>
+</body>
+<script>
+  var tmpEle
+  
+  function fn() {
+    var ul = document.createElement('ul')
+    for (var i = 0; i < 10; i++) {
+      var li = document.createElement('li')
+      ul.appendChild(li)
+    }
+    tmpEle = ul
+  }
+
+  document.getElementById('btn').addEventListener('click', fn, false)
+
+</script>
+</html>
