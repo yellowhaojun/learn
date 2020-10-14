@@ -21,7 +21,6 @@ console.log(foo2) // foo is not defined
 
 简单点来讲 { } 内就属于一个块，而这个作用域的作用就只在{}内，当我们使用var定义的时候，属于全局作用域，而使用let就成了块级作用域，所以foo1输出'foo'，而foo2会输出error foo is not defined
 
-
 ### let不存在变量提升
 
 ```js
