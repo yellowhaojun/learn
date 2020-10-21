@@ -9,13 +9,19 @@ yarn init
 安装依赖
 
 ```bash
-yarn add {模块名}
+yarn add <模块名>
+```
+
+安装依赖开发依赖
+
+```bash
+yarn add <模块名> --dev
 ```
 
 全局安装命令
 
 ```bash
-yarn global add {模块名}
+yarn global add <模块名>
 ```
 
 链接到目标文件夹，生成一个可执行命令， 在`link`目标文件夹种执行，生成命令默认使用的是当前目录`package.json`内的`name`的值

@@ -1,10 +1,10 @@
 # Grunt
 
-> `grunt`作为一个前端构建工具，一些重复性质的工作，比如资源压缩、代码检测、文件合并等
+> `grunt`作为一个基于文件读写的前端构建工具，用于处理一些重复性质的工作，比如资源压缩、代码检测、文件合并等
 
 ## 使用
 
-### 语法使用
+### 基础使用
 
 全局安装`grunt-cli`
 
@@ -244,17 +244,243 @@ Running "build:bar" (build) task
 task: build, target: bar, data: 456
 ```
 
+### 插件使用
 
+使用`grunt.loadNpmTasks`加载插件
 
+#### 文件清除`grunt-contrib-clean`
 
+安装
 
+```bash
+yarn add grunt-contrib-clean --dev
+```
 
+配置文件
 
+```js
+module.exports = grunt => {
+  grunt.initConfig({
+    clean: {
+      temp: 'tmp/**' // 需要清楚的文件路径，可以指定文件名或者使用通配符
+    }
+  })
 
+  grunt.loadNpmTasks('grunt-contrib-clean') // 加载插件
+}
+```
 
+#### 插件加载`load-grunt-tasks`
 
+安装
 
+```bash
+yarn add load-grunt-tasks --dev
+```
 
+配置文件
 
+```js
+const loadGruntTasks = require('load-grunt-tasks')
 
+module.exports = grunt => {
+  grunt.initConfig({
+    clean: {
+      temp: 'tmp/**'
+    }
+  })
+
+  loadGruntTasks(grunt) // 传入grunt，会自动加载所有你安装的插件
+}
+```
+
+#### sass编译`grunt-sass`
+
+安装
+
+```bash
+yarn add grunt-sass --dev
+yarn add sass --dev
+```
+
+配置文件
+
+```js
+onst loadGruntTasks = require('load-grunt-tasks')
+const sass = require('sass')
+
+module.exports = grunt => {
+  grunt.initConfig({
+    sass: {
+      options: {
+        sourceMap: true, // 是否开启sourceMap
+        implementation: sass // 使用的编译器
+      },
+      main: {
+        files: {
+          'dist/css/main.css': 'src/scss/main.scss' // 编译的路径 左边为编译后的路径，右边为需要编译的路径
+        }
+      }
+    },
+  })
+
+  loadGruntTasks(grunt)
+}
+```
+
+#### bable编译`grunt-babel`
+
+安装
+
+```bash
+yarn add grunt-babel --dev
+yarn add @babel/core --dev
+yarn add @babel/preset-env --dev
+```
+
+配置文件
+
+```js
+const loadGruntTasks = require('load-grunt-tasks')
+const sass = require('sass')
+
+module.exports = grunt => {
+  grunt.initConfig({
+    clean: {
+      temp: 'tmp/**'
+    },
+    sass: {
+      options: {
+        sourceMap: true,
+        implementation: sass
+      },
+      main: {
+        files: {
+          'dist/css/main.css': 'src/scss/main.scss'
+        }
+      }
+    },
+    babel: {
+      options: {
+        sourceMap: true, // 是否开启sourceMap
+        presets: ['@babel/preset-env'] 使用的presets
+      },
+      main: {
+        files: {
+          'dist/js/app.js': 'src/js/app.js' // 编译的路径 左边为编译后的路径，右边为需要编译的路径
+        }
+      }
+    }
+  })
+
+  loadGruntTasks(grunt)
+}
+```
+
+#### 监控文件变化 `grunt-contrib-watch`
+
+安装
+
+```bash
+yarn add grunt-contrib-watch --dev
+```
+
+配置文件
+
+```js
+onst loadGruntTasks = require('load-grunt-tasks')
+const sass = require('sass')
+
+module.exports = grunt => {
+  grunt.initConfig({
+    clean: {
+      temp: 'tmp/**'
+    },
+    sass: {
+      options: {
+        sourceMap: true,
+        implementation: sass
+      },
+      main: {
+        files: {
+          'dist/css/main.css': 'src/scss/main.scss'
+        }
+      }
+    },
+    babel: {
+      options: {
+        sourceMap: true,
+        presets: ['@babel/preset-env']
+      },
+      main: {
+        files: {
+          'dist/js/app.js': 'src/js/app.js'
+        }
+      }
+    },
+    watch: {
+      js: {
+        files: ['src/js/*.js'], // 监听的文件
+        tasks: ['babel'] // 当文件变化调用的任务
+      },
+      css: {
+        files: ['src/scss/*.scss'], // 监听的文件
+        tasks: ['sass'] // 当文件变化调用的任务
+      }
+    }
+  })
+
+  loadGruntTasks(grunt)
+}
+```
+
+一般配置`default`一起使用
+
+```js
+const loadGruntTasks = require('load-grunt-tasks')
+const sass = require('sass')
+
+module.exports = grunt => {
+  grunt.initConfig({
+    clean: {
+      temp: 'tmp/**'
+    },
+    sass: {
+      options: {
+        sourceMap: true,
+        implementation: sass
+      },
+      main: {
+        files: {
+          'dist/css/main.css': 'src/scss/main.scss'
+        }
+      }
+    },
+    babel: {
+      options: {
+        sourceMap: true,
+        presets: ['@babel/preset-env']
+      },
+      main: {
+        files: {
+          'dist/js/app.js': 'src/js/app.js'
+        }
+      }
+    },
+    watch: {
+      js: {
+        files: ['src/js/*.js'],
+        tasks: ['babel']
+      },
+      css: {
+        files: ['src/scss/*.scss'],
+        tasks: ['sass']
+      }
+    }
+  })
+
+  loadGruntTasks(grunt)
+  grunt.registerTask('default', ['sass', 'babel', 'watch'])
+}
+```
 
