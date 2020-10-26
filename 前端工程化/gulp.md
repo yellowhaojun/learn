@@ -182,7 +182,36 @@ exports.stream = done => {
 └── yarn.lock
 ```
 
+把目录当中的`normalize.css`进行压缩， 需要操作以下几步
 
+1. 读取`normalize.css`文件流
+2. 创建一个转换流，进行文件中的空格与字符的替换
+3. 返回一个经过处理的写入流
 
-### 插件的使用
+```js
+const fs = require('fs')
+const { Transform } = require('stream')
+
+exports.default = done => {
+  const readStream = fs.createReadStream('normalize.css') // 创建normalize.css的读取流
+  const writeStream = fs.createWriteStream('normalize.min.css') // 创建normalize.min.css的写入流
+
+  // 创建一个转换流
+  const transformStream =  new Transform({
+    transform: (chunk, encoding, callback) => {
+      const input = chunk.toString() // chunk 将会获取到流的内容，这个内容为二进制的流，所以需要进行转换
+      const output = input.replace(/\s+/g, '').replace(/\/\*.+?\*\//g, '') // 替换空格与注释为空字符串
+      callback(null, output) // 回调转换流的参数
+    }
+  })
+
+  return readStream.pipe(transformStream).pipe(writeStream) // 返回一个经过转换后的写入流
+}
+```
+
+从上面的例子当中，可以看出`gulp`核心处理都是在操作流
+
+#### 插件的使用
+
+实际上日常当中使用`gulp`，不会像上面的代码一样，什么都自己实现，`gulp`对于操作`stream`进行了一系的封装，结合插件能够快速的完成一系列的构建工作
 
