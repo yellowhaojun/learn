@@ -211,7 +211,7 @@ exports.default = done => {
 
 从上面的例子当中，可以看出`gulp`核心处理都是在操作流
 
-### 插件的使用
+### 编译任务
 
 #### src、dest、pipe
 
@@ -824,11 +824,237 @@ module.exports = {
 }
 ```
 
+#### del 删除
 
+除了使用基于`gulp`的插件外，还可以使用`node`的一些模块使用
+
+安装
+
+```bash
+yarn add del --dev
+```
+
+使用
+
+```js
+const { src, dest } = require('gulp')
+const loadPlugins = require('gulp-load-plugins')
+const del = require('del')
+
+const config = {
+  build: {
+    distPath: 'dist',
+    srcPath: 'src', // 源码目录
+    tempPath: 'temp', // 临时目录
+    assetsPaths: { // 资源目录
+      styles: 'assets/styles/*.scss', // 样式资源文件
+      scripts: 'assets/scripts/*.js', // 脚本资源文件
+      images: 'assets/images/**', // 图片资源文件
+      fonts: 'assets/fonts/**', // 字体资源文件
+      pages: '*.html'
+    }
+  },
+  data
+}
+
+const { tempPath, srcPath, distPath, assetsPaths } = config.build
+const { data: dataConf } = config
+const { styles, scripts, images, pages } = assetsPaths
+
+const plugins = loadPlugins()
+
+// 清除文件
+const clean = () => {
+  // del模块会返回一个promise，所以符合gulp任务的语法要求
+  return del([distPath, tempPath])
+}
+
+module.exports = {
+  clean
+}
+```
+
+#### 组合编译任务
+
+新增一个`extra`和 `font`，通过`series`和`parallel`把任务组合起来
+
+```js
+const { src, dest, series, parallel } = require('gulp')
+const loadPlugins = require('gulp-load-plugins')
+const del = require('del')
+
+const data = {
+  menus: [
+    {
+      name: 'Home',
+      icon: 'aperture',
+      link: 'index.html'
+    },
+    {
+      name: 'Features',
+      link: 'features.html'
+    },
+    {
+      name: 'About',
+      link: 'about.html'
+    },
+    {
+      name: 'Contact',
+      link: '#',
+      children: [
+        {
+          name: 'Twitter',
+          link: 'https://twitter.com/w_zce'
+        },
+        {
+          name: 'About',
+          link: 'https://weibo.com/zceme'
+        },
+        {
+          name: 'divider'
+        },
+        {
+          name: 'About',
+          link: 'https://github.com/zce'
+        }
+      ]
+    }
+  ],
+  pkg: require('./package.json'),
+  date: new Date()
+}
+
+const config = {
+  build: {
+    distPath: 'dist',
+    srcPath: 'src', // 源码目录
+    tempPath: 'temp', // 临时目录
+    publicPath: 'public', // 不打包的资源
+    assetsPaths: { // 资源目录
+      styles: 'assets/styles/*.scss', // 样式资源文件
+      scripts: 'assets/scripts/*.js', // 脚本资源文件
+      images: 'assets/images/**', // 图片资源文件
+      fonts: 'assets/fonts/**', // 字体资源文件
+      pages: '*.html'
+    }
+  },
+  data
+}
+
+const { tempPath, srcPath, distPath, assetsPaths, publicPath } = config.build
+const { data: dataConf } = config
+const { styles, scripts, images, pages, fonts } = assetsPaths
+
+const plugins = loadPlugins()
+
+// 编译css的文件
+const style = () => {
+  return src(`${srcPath}/${styles}`, { base: srcPath })
+    .pipe(plugins.sass({ outputStyle: 'expanded' }))
+    .pipe(dest(tempPath))
+}
+
+// 编译脚本文件
+const script = () => {
+  return src(`${srcPath}/${scripts}`, { base: srcPath })
+    .pipe(plugins.babel({ presets: [require('@babel/preset-env')] }))
+    .pipe(dest(tempPath))
+}
+
+// 压缩图片
+const image = () => {
+  return src(`${srcPath}/${images}`, { base: srcPath })
+    .pipe(plugins.imagemin())
+    .pipe(dest(tempPath))
+}
+
+// 编译页面资源
+const page = () => {
+  return src(`${srcPath}/${pages}`, { base: srcPath})
+    .pipe(plugins.swig({ data: dataConf, defaults: { cache: false } }))
+    .pipe(dest(tempPath))
+}
+
+// 压缩html文件资源
+const htmlmin = () => {
+  return src(`${srcPath}/${pages}`, { base: srcPath })
+    .pipe(plugins.swig({ data: dataConf, defaults: { cache: false } }))
+    .pipe(plugins.htmlmin({
+      collapseWhitespace: true, // 去除换行
+      minifyCSS: true, // 压缩html页面内的css
+      minifyJS: true // 压缩html页面内的js
+    }))
+    .pipe(dest(distPath))
+}
+
+
+// useref
+const useref = () => {
+  return src(`${tempPath}/${pages}`, { base: tempPath })
+    .pipe(plugins.useref({ searchPath:  [tempPath, '.'] }))
+    .pipe(plugins.if(/\.js$/, plugins.uglify())) // 以js结尾的文件，使用uglify插件进行压缩
+    .pipe(plugins.if(/\.css$/, plugins.cleanCss())) // 以css结尾的文件，使用cleanCss压缩
+    .pipe(plugins.if(/\.html$/, plugins.htmlmin({ // 以html结尾的文件，使用htmlmin压缩
+      collapseWhitespace: true,
+      minifyCSS: true,
+      minifyJS: true
+    })))
+    .pipe(dest(distPath))
+}
+
+
+// 压缩js资源
+const uglify = () => {
+  return src(`${srcPath}/${scripts}`, { base: srcPath })
+    .pipe(plugins.babel({ presets: [require('@babel/preset-env')] }))
+    .pipe(plugins.uglify())
+    .pipe(dest(tempPath))
+}
+
+// 清除文件
+const clean = () => {
+  // del模块会返回一个promise，所以符合gulp任务的语法要求
+  return del([distPath, tempPath])
+}
+
+// 复制文件
+const extra = () => {
+  return src('**', { base: publicPath })
+    .pipe(dest(distPath)) 
+}
+
+// 复制字体
+const font = () => {
+  return src(`${srcPath}/${fonts}`, { base: srcPath })
+    .pipe(plugins.imagemin())
+    .pipe(dest(distPath))
+}
+
+// 上线之前执行的任务
+const compile = parallel(style, script, page)
+
+const build = series(
+  clean,
+  parallel(
+    series(compile, useref),
+    image,
+    font,
+    extra
+  )
+)
+
+module.exports = {
+  build
+}
+```
+
+
+
+#### 启动本地环境
 
 #### browser-sync 启动本地服务
 
 用于启动本地服务
 
-#### del 用于删除资源
+
 
