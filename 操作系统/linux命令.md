@@ -1,4 +1,4 @@
-# 常见的命令
+# linux的命令
 
 ## tree
 
@@ -22,3 +22,18 @@ tree -I 'node_modules'
 tree -L 2
 ```
 
+## curl
+
+`curl`命令用于请求`WEB`服务器。它的名字就是客户端（client）的 URL 工具的意思
+
+基本使用
+
+```bash
+curl https://www.baidu.com
+```
+
+不带任何参数时，`curl`就是发出`GET`请求
+
+-A
+
+`-A`参数指定客户端用户代理标头，即`User-Agent`，`curl`的默认用户代理字符串是`culr[version]`
