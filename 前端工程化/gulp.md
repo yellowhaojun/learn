@@ -1048,13 +1048,298 @@ module.exports = {
 }
 ```
 
+### 启动本地环境
+
+在开发的阶段中，会使用一些任务来完成一些自动化构建的任务
+
+#### 启动本地服务
+
+安装`browser-sync`用于启动一个本地的服务器，用于调试
+
+安装
+
+```bash
+yarn add browser-sync --dev
+```
+
+使用
+
+```js
+const del = require('del')
+const browserSync = require('browser-sync')
+const { src, dest, series, parallel } = require('gulp')
+const loadPlugins = require('gulp-load-plugins')
+
+const bs = browserSync.create() // 返回一个服务器的实例
+
+const config = {
+  dev: {
+    notify: false, // 是否开启浏览器当中的notify提示
+    port: 8080, // 启动的端口号
+    open: false // 是否自动打开浏览器的终端
+  }
+}
+
+// 用于启动一个服务器
+const serve = () => {
+  const conf = Object.assign({
+    server: {
+      // 服务器基于哪个目录作为路径启动，当有多个的时候使用数组
+      baseDir: [tempPath, distPath, publicPath],
+      routes: { // 路由配置
+        '/node_modules': 'node_modules' // 把页面引入/node_modules指向当前项目的node_modules当中
+      }
+    }
+  }, devConf)
+
+  // 传入服务器配置
+  bs.init(conf)
+}
+
+```
+
+一般情况下，为了防止启动的时候，因为没有需要的文件，而发生错误，应当先执行一次所需文件编译工作
+
+```js
+const develop = series(compile, serve)
+```
+
+#### 监听文件的变化
+
+在开发过程当中，当修改文件过后，不可能再去启动一次服务器，所以需要每次修改内容过后，自动刷新浏览器的内容，可以使用`watch`进行内容的监听
+
+```js
+/ 用于启动一个服务器
+const serve = () => {
+  const conf = Object.assign({
+    files: `${tempPath}/**`, // 监听到tempPath内容发生改变就刷新内容
+    server: {
+      baseDir: [tempPath, distPath, publicPath],
+      routes: {
+        '/node_modules': 'node_modules'
+      }
+    }
+  }, devConf)
+
+  watch(styles, { cwd: srcPath }, style) // 监听样式文件，发生改变就执行style任务
+  watch(scripts, { cwd: srcPath }, script) //  监听j s文件，发生改变就执行script任务
+  watch(pages, { cwd: srcPath }, page) // 监听html文件，发生改变就执行page任务
+
+  watch([ images, fonts ], { cwd: srcPath }, bs.reload) // 监听图片文字变化，刷新页面
+
+  watch('**', { cwd: publicPath }, bs.reload) // 监听 public 目录的资源，发生改变刷新页面
+
+  // 传入服务器配置
+  bs.init(conf)
+}
+```
+
+除了使用`files`的关键字，来执行刷新外，还可以在任务中加一个管道，使用`bs.reload`进行刷新内容
+
+```js
+const script = () => {
+  return src(`${srcPath}/${scripts}`, { base: srcPath })
+    .pipe(plugins.babel({ presets: [require('@babel/preset-env')] }))
+    .pipe(dest(tempPath))
+  	.pipe(bs.reload({ stream: true }))
+}
+```
+
+还可以像上面一样使用`cwd`这个参数来指定运行的目录
+
+```js
+const script = () => {
+  return src(scripts, { base: srcPath, cwd: srcPath })
+    .pipe(plugins.babel({ presets: [require('@babel/preset-env')] }))
+    .pipe(dest(tempPath))
+}
+```
+
+最终结果
+
+```js
+const del = require('del')
+const browserSync = require('browser-sync')
+const { src, dest, series, parallel, watch } = require('gulp')
+const loadPlugins = require('gulp-load-plugins')
 
 
-#### 启动本地环境
+const bs = browserSync.create() // 返回一个服务器的实例
 
-#### browser-sync 启动本地服务
+const data = {
+  menus: [
+    {
+      name: 'Home',
+      icon: 'aperture',
+      link: 'index.html'
+    },
+    {
+      name: 'Features',
+      link: 'features.html'
+    },
+    {
+      name: 'About',
+      link: 'about.html'
+    },
+    {
+      name: 'Contact',
+      link: '#',
+      children: [
+        {
+          name: 'Twitter',
+          link: 'https://twitter.com/w_zce'
+        },
+        {
+          name: 'About',
+          link: 'https://weibo.com/zceme'
+        },
+        {
+          name: 'divider'
+        },
+        {
+          name: 'About',
+          link: 'https://github.com/zce'
+        }
+      ]
+    }
+  ],
+  pkg: require('./package.json'),
+  date: new Date()
+}
 
-用于启动本地服务
+const config = {
+  dev: {
+    notify: false,
+    port: 8080,
+    open: false
+  },
+  build: {
+    distPath: 'dist',
+    srcPath: 'src', // 源码目录
+    tempPath: 'temp', // 临时目录
+    publicPath: 'public', // 不打包的资源
+    assetsPaths: { // 资源目录
+      styles: 'assets/styles/*.scss', // 样式资源文件
+      scripts: 'assets/scripts/*.js', // 脚本资源文件
+      images: 'assets/images/**', // 图片资源文件
+      fonts: 'assets/fonts/**', // 字体资源文件
+      pages: '*.html'
+    }
+  },
+  data
+}
+
+const { tempPath, srcPath, distPath, assetsPaths, publicPath } = config.build
+const { data: dataConf, dev: devConf } = config
+const { styles, scripts, images, pages, fonts } = assetsPaths
+
+const plugins = loadPlugins()
+
+// 编译css的文件
+const style = () => {
+  return src(styles, { base: srcPath, cwd: srcPath })
+    .pipe(plugins.sass({ outputStyle: 'expanded' }))
+    .pipe(dest(tempPath))
+}
+
+// 编译脚本文件
+const script = () => {
+  return src(scripts, { base: srcPath, cwd: srcPath })
+    .pipe(plugins.babel({ presets: [require('@babel/preset-env')] }))
+    .pipe(dest(tempPath))
+}
+
+// 压缩图片
+const image = () => {
+  return src(images, { base: srcPath, cwd: srcPath })
+    .pipe(plugins.imagemin())
+    .pipe(dest(tempPath))
+}
+
+// 编译页面资源
+const page = () => {
+  return src(pages, { base: srcPath, cwd: srcPath })
+    .pipe(plugins.swig({ data: dataConf, defaults: { cache: false } }))
+    .pipe(dest(tempPath))
+}
+
+// useref
+const useref = () => {
+  return src(pages, { base: tempPath, cwd: tempPath })
+    .pipe(plugins.useref({ searchPath:  [tempPath, '.'] }))
+    .pipe(plugins.if(/\.js$/, plugins.uglify())) // 以js结尾的文件，使用uglify插件进行压缩
+    .pipe(plugins.if(/\.css$/, plugins.cleanCss())) // 以css结尾的文件，使用cleanCss压缩
+    .pipe(plugins.if(/\.html$/, plugins.htmlmin({ // 以html结尾的文件，使用htmlmin压缩
+      collapseWhitespace: true,
+      minifyCSS: true,
+      minifyJS: true
+    })))
+    .pipe(dest(distPath))
+}
 
 
+// 清除文件
+const clean = () => {
+  // del模块会返回一个promise，所以符合gulp任务的语法要求
+  return del([distPath, tempPath])
+}
+
+// 复制文件
+const extra = () => {
+  return src('**', { base: publicPath, cwd: publicPath })
+    .pipe(dest(distPath)) 
+}
+
+// 复制字体
+const font = () => {
+  return src(fonts, { base: srcPath, cwd: srcPath })
+    .pipe(plugins.imagemin())
+    .pipe(dest(distPath))
+}
+
+// 上线之前执行的任务
+const compile = parallel(style, script, page)
+
+const build = series(
+  clean,
+  parallel(
+    series(compile, useref),
+    image,
+    font,
+    extra
+  )
+)
+
+// 用于启动一个服务器
+const serve = () => {
+  const conf = Object.assign({
+    files: `${tempPath}/**`,
+    server: {
+      baseDir: [tempPath, distPath, publicPath],
+      routes: {
+        '/node_modules': 'node_modules'
+      }
+    }
+  }, devConf)
+
+  watch(styles, { cwd: srcPath }, style)
+  watch(scripts, { cwd: srcPath }, script)
+  watch(pages, { cwd: srcPath }, page)
+
+  watch([ images, fonts ], { cwd: srcPath }, bs.reload)
+
+  watch('**', { cwd: publicPath }, bs.reload)
+
+  // 传入服务器配置
+  bs.init(conf)
+}
+
+const develop = series(compile, serve)
+
+module.exports = {
+  build,
+  develop,
+  clean
+}
+```
 
