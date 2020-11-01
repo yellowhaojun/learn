@@ -1343,3 +1343,91 @@ module.exports = {
 }
 ```
 
+#### 封装
+
+日常开发当中，我们不可能每次新建一个项目，都去复制一份`gulpfile`文件，为了方便使用，可以通过封装成一个脚手架工具
+
+开发调试阶段，使用`yarn link`进行链接项目，建立一个`just-page`的目录
+
+`just-page`的目录
+
+```bash
+├── bin
+│   └── command.js    bin可执行文件
+├── lib
+│   └── index.js        核心文件
+└── package.json
+```
+
+改写`gulpfile`文件
+
+把之前`gulpfile`文件的内容，复制到`lib/index.js`的文件内，`data`的数据应该由用户由外面传入
+
+```js
+const path = require('path')
+
+const cwd = process.cwd() // 获取程序运行环境的目录
+
+let config = {
+  dev: {
+    notify: false,
+    port: 8080,
+    open: false
+  },
+  build: {
+    distPath: 'dist',
+    srcPath: 'src', // 源码目录
+    tempPath: 'temp', // 临时目录
+    publicPath: 'public', // 不打包的资源
+    assetsPaths: { // 资源目录
+      styles: 'assets/styles/*.scss', // 样式资源文件
+      scripts: 'assets/scripts/*.js', // 脚本资源文件
+      images: 'assets/images/**', // 图片资源文件
+      fonts: 'assets/fonts/**', // 字体资源文件
+      pages: '*.html'
+    }
+  }
+}
+
+try {
+  const pageConfigPath = path.join(cwd, './pages.config.js') // 获取配置文件的路径
+  const loadConfig = require(pageConfigPath) // 加载文件的内容
+  config = Object.assign({}, config, loadConfig) // 合并配置的内容
+} catch (e) {
+  throw new Error('get pages.config error')
+}
+```
+
+编写可执行文件
+
+编写`bin/command.js`, `#!/usr/bin/env node`是用于标识这是`node`的可执行文件
+
+```js
+#!/usr/bin/env node
+
+process.argv.push('--cwd') // 给命令行参数新增--cwd
+process.argv.push(process.cwd()) // 给命令行参数新增程序运行路径
+process.argv.push('--gulpfile') // 给命令行参数新增 --gulpfile
+process.argv.push(require.resolve('../lib/index')) // 给命令行参数指定运行gulpfile文件
+
+require('gulp/bin/gulp') // 加载gulp-cli
+```
+
+可以把`require.resolve('../lib/index')`改写成`require.resolve('..')`, 但是需要在`package.json`内新增`main`字段的内容
+
+```json
+{
+  "main": "lib/index.js",
+}
+```
+
+在`package.json`内新增`bin`可执行命令
+
+```json
+{
+  "bin": {
+    "just-page": "./bin/command.js"
+  }
+}
+```
+
