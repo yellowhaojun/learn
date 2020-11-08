@@ -306,7 +306,7 @@ yarn add sass --dev
 配置文件
 
 ```js
-onst loadGruntTasks = require('load-grunt-tasks')
+const loadGruntTasks = require('load-grunt-tasks')
 const sass = require('sass')
 
 module.exports = grunt => {
